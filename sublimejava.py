@@ -22,6 +22,7 @@ freely, subject to the following restrictions:
 """
 import sublime
 import sublime_plugin
+from os import pathsep
 import os.path
 import re
 try:
@@ -59,7 +60,7 @@ class SublimeJavaDotComplete(completioncommon.CompletionCommonDotComplete):
 class SublimeJavaCompletion(completioncommon.CompletionCommon):
     def __init__(self):
         super(SublimeJavaCompletion, self).__init__("SublimeJava.sublime-settings", os.path.dirname(os.path.abspath(__file__)))
-        self.javaseparator = None  # just so that get_cmd references it. It's set "for real" later
+        self.javaseparator = pathsep  # just so that get_cmd references it. It's set "for real" later
         self.javaseparator = self.run_completion("-separator").strip()
         self.regex = [
             (re.compile(r"\[I([,)}]|$)"), r"int[]\1"),
