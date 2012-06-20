@@ -1,6 +1,6 @@
 [submodule "parsehelp"]
 	path = parsehelp
-	url = git://github.com/quarnster/parsehelp.git
+	url = https://github.com/quarnster/parsehelp.git
 [submodule "sublimecompletioncommon"]
 	path = sublimecompletioncommon
-	url = git://github.com/quarnster/SublimeCompletionCommon.git
+	url = https://github.com/nlloyd/SublimeCompletionCommon.git
