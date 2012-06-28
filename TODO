@@ -1,0 +1,9 @@
+SublimeJava TODO:
+- multi-classpath autocomplete
+- class name autocomplete (check for CamelCaseWord and find appropriate imported class)
+    - not-yet-imported class name autocomplete (expansion to above to add non-imported classes to autocomplete list... and autoimport)
+- extends/implements autocomplete
+- (possible???) static import autocomplete
+
+bugs
+- fix autocomplete lockup when non-existent variable is referenced
