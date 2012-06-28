@@ -61,7 +61,7 @@ class SublimeJavaCompletion(completioncommon.CompletionCommon):
     def __init__(self):
         super(SublimeJavaCompletion, self).__init__("SublimeJava.sublime-settings", os.path.dirname(os.path.abspath(__file__)))
         self.javaseparator = pathsep  # just so that get_cmd references it. It's set "for real" later
-        self.javaseparator = self.run_completion("-separator").strip()
+        # self.javaseparator = self.run_completion("-separator").strip()
         self.regex = [
             (re.compile(r"\[I([,)}]|$)"), r"int[]\1"),
             (re.compile(r"\[F([,)}]|$)"), r"float[]\1"),
@@ -74,7 +74,7 @@ class SublimeJavaCompletion(completioncommon.CompletionCommon):
             (re.compile(r"\[\L?([\w\./]+)(;)?"), r"\1[]")]
 
     def get_packages(self, data, thispackage, type):
-        print 'sublimejava.get_packages: data=%s, thispackage=%s, type=%s' % (data, thispackage, type)
+        print '>>>sublimejava.get_packages: thispackage=%s, type=%s' % (thispackage, type)
         packages = re.findall(r"(?:^|\n)[ \t]*import[ \t]+(.*);", data)
         packages.append("java.lang.*")
         packages.append("")  # for int, boolean, etc
@@ -98,7 +98,7 @@ class SublimeJavaCompletion(completioncommon.CompletionCommon):
         return packages
 
     def get_cmd(self):
-        print 'sublimejava.get_cmd'
+        print '>>>sublimejava.get_cmd'
         classpath = "."
         if self.javaseparator != None:
             classpath = self.get_setting("sublimejava_classpath", ["."])
@@ -107,14 +107,14 @@ class SublimeJavaCompletion(completioncommon.CompletionCommon):
         return "java -classpath %s SublimeJava" % classpath
 
     def is_supported_language(self, view):
-        print 'sublimejava.is_supported_language'
+        print '>>>sublimejava.is_supported_language'
         if view.is_scratch() or not self.get_setting("sublimejava_enabled", True):
             return False
         language = self.get_language(view)
         return language == "java" or language == "jsp"
 
     def sub(self, regex, sub, data):
-        print 'sublimejava.sub: regex=%s, sub=%s, data=%s' % (regex, sub, data)
+        # print '>>>sublimejava.sub: regex=%s, sub=%s, data=%s' % (regex, sub, data)
         olddata = data
         data = regex.sub(sub, data)
         while data != olddata:
@@ -123,13 +123,13 @@ class SublimeJavaCompletion(completioncommon.CompletionCommon):
         return data
 
     def fixnames(self, data):
-        print 'sublimejava.fixnames: data=%s' % data
+        # print '>>>sublimejava.fixnames:'
         for regex, replace in self.regex:
             data = self.sub(regex, replace, data)
         return data
 
     def return_completions(self, comp):
-        print 'sublimejava.return_completions:'
+        print '>>>sublimejava.return_completions:'
         ret = []
         for display, insert in comp:
             ret.append((self.fixnames(display), self.fixnames(insert)))
@@ -141,14 +141,22 @@ comp = SublimeJavaCompletion()
 class SublimeJava(sublime_plugin.EventListener):
 
     def on_query_completions(self, view, prefix, locations):
-        print "sublimejava.on_query_completions: prefix::%s" % prefix
+        print ">>>sublimejava.on_query_completions: prefix::%s" % prefix
         return comp.on_query_completions(view, prefix, locations)
 
     def on_query_context(self, view, key, operator, operand, match_all):
-        print 'sublimejava.on_query_context: key=%s, operator=%s, operand=%s' % (key, operator, operand)
+        print '>>>sublimejava.on_query_context: key=%s, operator=%s, operand=%s' % (key, operator, operand)
         if key == "sublimejava.dotcomplete":
             return comp.get_setting(key.replace(".", "_"), True)
         elif key == "sublimejava.supported_language":
             return comp.is_supported_language(view)
         else:
             return comp.on_query_context(view, key, operator, operand, match_all)
+
+    def on_post_save(self, view):
+        # tell autocomplete engine what project you belong to
+        print "on_post_save: %s" % view.file_name()
+        
+    def on_activated(self, view):
+        # tell the autocomplete engine what project you belong to
+        print "on_activated: %s" % view.file_name()
