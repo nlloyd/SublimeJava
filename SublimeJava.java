@@ -20,13 +20,23 @@ freely, subject to the following restrictions:
    3. This notice may not be removed or altered from any source
    distribution.
 */
-import java.lang.reflect.*;
-import java.net.URL;
+/* MODIFIED BY Nick Lloyd */
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.*;
-import java.util.regex.Pattern;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SublimeJava
 {
@@ -238,6 +248,8 @@ public class SublimeJava
 
     public static void main(String... unusedargs)
     {
+        Map<String,PackageExposingClassLoader> classLoadersByProjectPath = new Hashtable<String,PackageExposingClassLoader>();
+
         try
         {
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
@@ -271,6 +283,18 @@ public class SublimeJava
                         {
                             System.out.println(System.getProperty("path.separator"));
                             continue;
+                        }
+                        else if (args[0].equals("-haveclasspath"))
+                        {
+                            // TODO
+                        }
+                        else if (args[0].equals("-newclasspath"))
+                        {
+                            // TODO
+                        }
+                        else if (args[0].equals("-useclasspath"))
+                        {
+                            // TODO
                         }
                         else if (args[0].equals("-findclass"))
                         {
@@ -391,6 +415,26 @@ public class SublimeJava
         {
             System.err.println("Error: " + e.getMessage());
             e.printStackTrace(System.err);
+        }
+    }
+
+    private static class PackageExposingClassLoader extends URLClassLoader {
+
+        public PackageExposingClassLoader(URL[] urls)
+        {
+            super(urls);
+        }
+
+        public List<String> getPackageNames()
+        {
+            Package[] packages = getPackages();
+            List<String> packageNames = new ArrayList<String>(packages.length);
+            for(Package pkg : packages)
+            {
+                packageNames.add(pkg.getName());
+            }
+
+            return packageNames;
         }
     }
 }
