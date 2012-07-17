@@ -53,6 +53,28 @@ for more details.""")
     hack(showError)
 
 
+'''
+Recursive call to find (and return) the nearest path in the current
+tree (searching up the path tree) to a pom.xml file.
+Returns None if we hit the root without hitting a pom.xml file.
+'''
+def find_nearest_pom(path):
+    cur_path = None
+    if os.path.isdir(path):
+        cur_path = path
+    else:
+        cur_path = os.path.dirname(path)
+
+    if os.path.isfile(os.path.join(cur_path, 'pom.xml')):
+        return cur_path
+    else:
+        parent,child = os.path.split(cur_path)
+        if len(child) == 0:
+            return None
+        else:
+            return find_nearest_pom(parent)
+
+
 class SublimeJavaDotComplete(completioncommon.CompletionCommonDotComplete):
     pass
 
@@ -154,6 +176,15 @@ class SublimeJava(sublime_plugin.EventListener):
             return comp.on_query_context(view, key, operator, operand, match_all)
 
     def on_post_save(self, view):
+        active_project_cp = find_nearest_pom(view.file_name)
+        have_cp = bool(comp.run_completion('-haveclasspath', active_project_cp).strip())
+        if have_cp:
+            comp.run_completion('-useclasspath')
+        else:
+            if not self.classpaths:
+                pass
+
+            comp.run_completion('-newclasspath')
         # tell autocomplete engine what project you belong to
         print "on_post_save: %s" % view.file_name()
         
